@@ -7,8 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageCircle, User, Star, Clock, Send, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from '@/lib/supabase';
 import type { Pharmacist } from "@/types";
 
 const questionCategories = [

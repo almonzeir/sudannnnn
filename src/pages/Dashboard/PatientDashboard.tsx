@@ -1,6 +1,6 @@
 import { useMedications } from "@/hooks/useMedications";
 import { MedicationCard } from "@/components/medications/MedicationCard";
-import { QueryStatus } from "@/components/QueryStatus";
+import { QueryStatus } from "@/components/ui/query-status";
 import { Medication } from "@/types";
 
 export default function PatientDashboard() {

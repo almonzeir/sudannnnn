@@ -5,7 +5,7 @@ import type { Medication } from "@/types";
 interface MedicationCardProps {
   medication: Medication;
   index: number;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export const MedicationCard = ({ medication, index, onClick }: MedicationCardProps) => {

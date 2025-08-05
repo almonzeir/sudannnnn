@@ -22,7 +22,10 @@ import {
   FileText,
   Upload
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { FcGoogle } from "react-icons/fc";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +44,9 @@ const Register = () => {
   });
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const navigate = useNavigate();
+
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -49,53 +54,161 @@ const Register = () => {
 
   const handleRegister = async (userType: 'patient' | 'pharmacist') => {
     if (!formData.fullName || !formData.email || !formData.password) {
-      toast({
-        title: "خطأ",
-        description: "يرجى ملء جميع الحقول المطلوبة",
-        variant: "destructive"
-      });
+      toast.error("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "خطأ",
-        description: "كلمات المرور غير متطابقة",
-        variant: "destructive"
-      });
+      toast.error("كلمات المرور غير متطابقة");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
       return;
     }
 
     if (!agreeToTerms) {
-      toast({
-        title: "خطأ",
-        description: "يرجى الموافقة على الشروط والأحكام",
-        variant: "destructive"
-      });
+      toast.error("يرجى الموافقة على الشروط والأحكام");
       return;
     }
 
     if (userType === 'pharmacist' && (!formData.licenseNumber || !formData.university)) {
-      toast({
-        title: "خطأ",
-        description: "يرجى ملء جميع بيانات الترخيص المهني",
-        variant: "destructive"
-      });
+      toast.error("يرجى ملء جميع بيانات الترخيص المهني");
       return;
     }
 
     setIsLoading(true);
     
-    // Simulate registration
-    setTimeout(() => {
-      toast({
-        title: "تم إنشاء الحساب بنجاح",
-        description: userType === 'pharmacist' 
-          ? "سيتم مراجعة طلبك والتواصل معك خلال 24 ساعة"
-          : "مرحباً بك في دليلي الدوائي",
+    try {
+      // Register with email and password
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName
+          }
+        }
       });
+      
+
+      
+      if (error) {
+        console.error('Supabase auth error:', error);
+        throw error;
+      }
+
+      if (!data.user) {
+        console.error('No user data returned from sign up');
+        throw new Error('فشل في إنشاء الحساب');
+      }
+
+
+
+      // Create user profile in the database
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: formData.email,
+          full_name: formData.fullName,
+          phone: formData.phone || null,
+          location: formData.location || null,
+          role: 'patient' // Default role, pharmacists will be updated after approval
+        });
+
+      if (profileError) {
+        console.error('Error creating user profile:', profileError);
+        toast.error('تم إنشاء الحساب ولكن فشل في حفظ البيانات الشخصية');
+        // Don't throw error here as auth user is already created
+      } else {
+  
+      }
+
+      // If registering as pharmacist, create pharmacist application
+      if (userType === 'pharmacist') {
+  
+        
+        const { error: pharmacistError } = await supabase
+          .from('pharmacists')
+          .insert({
+            user_id: data.user.id,
+            license_number: formData.licenseNumber,
+            university: formData.university,
+            graduation_year: parseInt(formData.graduationYear) || new Date().getFullYear(),
+            specialization: formData.specialization || null,
+            status: 'pending'
+          });
+
+        if (pharmacistError) {
+          console.error('Error creating pharmacist application:', pharmacistError);
+          toast.error('تم إنشاء الحساب ولكن فشل في تقديم طلب الصيدلي');
+        } else {
+    
+          toast.success('تم إنشاء الحساب وتقديم طلب الصيدلي بنجاح! سيتم مراجعة طلبك قريباً');
+        }
+      } else {
+        toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في دليلي الدوائي');
+      }
+
+
+
+      // Navigate to login page
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      
+    } catch (error: any) {
+      console.error('Registration error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        stack: error.stack
+      });
+      
+      // Provide more specific error messages
+      let errorMessage = 'حدث خطأ أثناء إنشاء الحساب';
+      
+      if (error.message?.includes('fetch')) {
+        errorMessage = 'خطأ في الاتصال بالخادم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى';
+      } else if (error.message?.includes('User already registered')) {
+        errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+      } else if (error.message?.includes('Invalid email')) {
+        errorMessage = 'البريد الإلكتروني غير صحيح';
+      } else if (error.message?.includes('Password')) {
+        errorMessage = 'كلمة المرور ضعيفة جداً';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
+      if (error) {
+        console.error('Google OAuth error:', error);
+        toast.error('فشل في تسجيل الدخول بجوجل');
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      toast.error('حدث خطأ أثناء تسجيل الدخول بجوجل');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -552,6 +665,18 @@ const Register = () => {
                   <span className="bg-card px-2 text-muted-foreground">أو</span>
                 </div>
               </div>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full bg-background/50 border-primary/20 hover:bg-primary/5 transition-all duration-200"
+                onClick={handleGoogleRegister}
+                disabled={isLoading}
+              >
+                <FcGoogle className="w-5 h-5 ml-2" />
+                إنشاء حساب بجوجل
+              </Button>
               
               <p className="text-sm text-muted-foreground">
                 لديك حساب بالفعل؟{' '}

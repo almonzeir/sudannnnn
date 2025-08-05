@@ -1,0 +1,47 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Robot Body -->
+  <rect x="64" y="120" width="128" height="96" rx="24" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="2"/>
+  
+  <!-- Robot Head -->
+  <rect x="80" y="64" width="96" height="80" rx="20" fill="#F0F9FF" stroke="#0EA5E9" stroke-width="2"/>
+  
+  <!-- Eyes -->
+  <circle cx="104" cy="96" r="8" fill="#0EA5E9"/>
+  <circle cx="152" cy="96" r="8" fill="#0EA5E9"/>
+  
+  <!-- Smile -->
+  <path d="M 120 116 Q 128 124 136 116" stroke="#0EA5E9" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Antenna -->
+  <line x1="128" y1="64" x2="128" y2="48" stroke="#0EA5E9" stroke-width="2"/>
+  <circle cx="128" cy="44" r="4" fill="#10B981"/>
+  
+  <!-- Arms -->
+  <rect x="40" y="140" width="24" height="40" rx="12" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="2"/>
+  <rect x="192" y="140" width="24" height="40" rx="12" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="2"/>
+  
+  <!-- Medical Cross on Chest -->
+  <rect x="120" y="150" width="16" height="4" rx="2" fill="#EF4444"/>
+  <rect x="126" y="144" width="4" height="16" rx="2" fill="#EF4444"/>
+  
+  <!-- Chat Bubble -->
+  <ellipse cx="200" cy="80" rx="32" ry="20" fill="#DBEAFE" stroke="#3B82F6" stroke-width="2"/>
+  <path d="M 180 92 L 172 100 L 180 96 Z" fill="#DBEAFE" stroke="#3B82F6" stroke-width="2"/>
+  
+  <!-- Chat Dots -->
+  <circle cx="192" cy="80" r="2" fill="#3B82F6"/>
+  <circle cx="200" cy="80" r="2" fill="#3B82F6"/>
+  <circle cx="208" cy="80" r="2" fill="#3B82F6"/>
+  
+  <!-- Stethoscope -->
+  <path d="M 96 180 Q 88 188 88 200 Q 88 212 96 220" stroke="#10B981" stroke-width="3" fill="none"/>
+  <circle cx="96" cy="220" r="6" fill="none" stroke="#10B981" stroke-width="3"/>
+  <line x1="96" y1="180" x2="104" y2="172" stroke="#10B981" stroke-width="3"/>
+  <line x1="104" y1="172" x2="112" y2="180" stroke="#10B981" stroke-width="3"/>
+  
+  <!-- Prescription Pad -->
+  <rect x="140" y="190" width="20" height="16" rx="2" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+  <line x1="144" y1="194" x2="156" y2="194" stroke="#F59E0B" stroke-width="1"/>
+  <line x1="144" y1="198" x2="156" y2="198" stroke="#F59E0B" stroke-width="1"/>
+  <line x1="144" y1="202" x2="152" y2="202" stroke="#F59E0B" stroke-width="1"/>
+</svg>
