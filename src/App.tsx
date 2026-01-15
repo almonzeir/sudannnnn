@@ -10,6 +10,8 @@ import { ThemeProvider } from "./components/theme-provider"
 
 // Auth Provider
 import { AuthProvider } from "./context/AuthContext"
+import ConvexClientProvider from "./components/ConvexClientProvider"
+import Seeder from "./components/Seeder"
 
 // Core Components
 import Layout from "./components/Layout"
@@ -74,6 +76,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const App = () => (
   <ErrorBoundary>
+    <ConvexClientProvider>
+    <Seeder />
     <AuthProvider>
       <ThemeProvider defaultTheme="system" storageKey="medical-ui-theme">
         <QueryClientProvider client={queryClient}>
@@ -117,6 +121,7 @@ const App = () => (
         </QueryClientProvider>
       </ThemeProvider>
     </AuthProvider>
+    </ConvexClientProvider>
   </ErrorBoundary>
 )
 
