@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +43,14 @@ const Medications = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedMedication(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
 
   const categories = [
     { id: 'all', name: 'جميع الفئات', icon: BookOpen },
@@ -222,9 +230,18 @@ const Medications = () => {
               {filteredMedications.map((medication, index) => (
                 <Card 
                   key={medication.id}
-                  className="group bg-gradient-card border-primary/20 hover:border-primary/40 hover:shadow-medical transition-all duration-500 hover:scale-105 cursor-pointer animate-fade-in-up"
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`عرض تفاصيل ${medication.arabicName}`}
+                  className="group bg-gradient-card border-primary/20 hover:border-primary/40 hover:shadow-medical transition-all duration-500 hover:scale-105 cursor-pointer animate-fade-in-up focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
                   style={{ animationDelay: `${index * 0.1}s` }}
                   onClick={() => setSelectedMedication(medication)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedMedication(medication);
+                    }
+                  }}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -360,6 +377,7 @@ const Medications = () => {
                 <Button 
                   variant="ghost" 
                   size="icon"
+                  aria-label="إغلاق"
                   onClick={() => setSelectedMedication(null)}
                 >
                   <X className="w-5 h-5" />
