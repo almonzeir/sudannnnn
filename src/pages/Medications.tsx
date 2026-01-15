@@ -19,11 +19,16 @@ import {
   Star,
   BookOpen,
   Archive,
-  X
+  X,
+  Loader2
 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Medication {
-  id: string;
+  _id: string;
   name: string;
   arabicName: string;
   category: string;
@@ -34,7 +39,7 @@ interface Medication {
   contraindications: string[];
   storage: string;
   price?: string;
-  availability: 'متوفر' | 'غير متوفر' | 'محدود';
+  availability: string;
   rating: number;
   image?: string;
 }
@@ -43,6 +48,14 @@ const Medications = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
+
+  // Fetch data from Convex
+  const medications = useQuery(api.medications.list, {
+    search: searchQuery,
+    category: selectedCategory
+  });
+
+  const acuteConditions = useQuery(api.acuteConditions.list);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -62,108 +75,16 @@ const Medications = () => {
     { id: 'vitamins', name: 'الفيتامينات', icon: Star },
   ];
 
-  const medications: Medication[] = [
-    {
-      id: '1',
-      name: 'Paracetamol',
-      arabicName: 'باراسيتامول',
-      category: 'pain',
-      description: 'مسكن للألم وخافض للحرارة آمن للاستخدام',
-      uses: ['تسكين الآلام الخفيفة إلى المتوسطة', 'خفض الحرارة', 'آلام الصداع', 'آلام الأسنان'],
-      dosage: '500-1000 مجم كل 6-8 ساعات (أقصى 4 جرام يومياً)',
-      sideEffects: ['نادراً: طفح جلدي', 'نادراً: مشاكل في الكبد عند الجرعات العالية'],
-      contraindications: ['حساسية من الباراسيتامول', 'أمراض الكبد الشديدة'],
-      storage: 'يحفظ في درجة حرارة الغرفة بعيداً عن الرطوبة',
-      price: '5-15 جنيه سوداني',
-      availability: 'متوفر',
-      rating: 4.8
-    },
-    {
-      id: '2',
-      name: 'Amoxicillin',
-      arabicName: 'أموكسيسيلين',
-      category: 'antibiotics',
-      description: 'مضاد حيوي واسع المدى لعلاج العدوى البكتيرية',
-      uses: ['التهابات الجهاز التنفسي', 'التهابات الأذن', 'التهابات المسالك البولية', 'التهابات الجلد'],
-      dosage: '250-500 مجم كل 8 ساعات لمدة 7-10 أيام',
-      sideEffects: ['إسهال', 'غثيان', 'طفح جلدي', 'اضطراب في المعدة'],
-      contraindications: ['حساسية من البنسلين', 'الحمل (بحذر)', 'أمراض الكلى الشديدة'],
-      storage: 'يحفظ في الثلاجة للشراب، درجة حرارة الغرفة للأقراص',
-      price: '25-45 جنيه سوداني',
-      availability: 'متوفر',
-      rating: 4.5
-    },
-    {
-      id: '3',
-      name: 'Metformin',
-      arabicName: 'ميتفورمين',
-      category: 'diabetes',
-      description: 'دواء أساسي لعلاج داء السكري من النوع الثاني',
-      uses: ['تنظيم مستوى السكر في الدم', 'تحسين حساسية الأنسولين', 'إنقاص الوزن'],
-      dosage: '500-1000 مجم مرتين يومياً مع الطعام',
-      sideEffects: ['اضطراب في المعدة', 'إسهال', 'طعم معدني في الفم', 'نقص فيتامين B12'],
-      contraindications: ['أمراض الكلى الشديدة', 'قصور القلب', 'إدمان الكحول'],
-      storage: 'يحفظ في درجة حرارة الغرفة بعيداً عن الرطوبة',
-      price: '30-60 جنيه سوداني',
-      availability: 'متوفر',
-      rating: 4.6
-    },
-    {
-      id: '4',
-      name: 'Aspirin',
-      arabicName: 'أسبرين',
-      category: 'heart',
-      description: 'مسكن ومضاد للالتهاب ومضاد لتجلط الدم',
-      uses: ['تسكين الآلام', 'تقليل الالتهاب', 'منع تجلط الدم', 'الوقاية من النوبات القلبية'],
-      dosage: '75-100 مجم يومياً للوقاية، 300-600 مجم للألم',
-      sideEffects: ['تهيج المعدة', 'نزيف', 'طنين في الأذن', 'حرقة المعدة'],
-      contraindications: ['قرحة المعدة', 'اضطرابات النزيف', 'الحساسية من الأسبرين'],
-      storage: 'يحفظ في مكان بارد وجاف',
-      price: '10-20 جنيه سوداني',
-      availability: 'متوفر',
-      rating: 4.3
-    }
-  ];
-
-  const filteredMedications = medications.filter(med => {
-    const matchesSearch = med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         med.arabicName.includes(searchQuery);
-    const matchesCategory = selectedCategory === 'all' || med.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const acuteConditions = [
-    {
-      name: 'الإسهال والكوليرا',
-      symptoms: ['إسهال متكرر', 'جفاف', 'ألم في البطن', 'حمى'],
-      homecare: ['شرب السوائل بكثرة', 'محلول الجفاف', 'تجنب الألبان', 'الراحة'],
-      warning: 'راجع الطبيب فوراً في حالة الجفاف الشديد أو ارتفاع الحرارة'
-    },
-    {
-      name: 'الملاريا',
-      symptoms: ['حمى شديدة', 'قشعريرة', 'صداع', 'تعرق', 'ألم في العضلات'],
-      homecare: ['شرب السوائل', 'خفض الحرارة', 'الراحة التامة'],
-      warning: 'حالة طوارئ - راجع أقرب مركز صحي فوراً'
-    },
-    {
-      name: 'الحصبة',
-      symptoms: ['طفح جلدي أحمر', 'حمى', 'سعال', 'احمرار العين'],
-      homecare: ['عزل المريض', 'شرب السوائل', 'خفض الحرارة', 'راحة تامة'],
-      warning: 'راجع الطبيب للتأكد من التشخيص والعلاج'
-    },
-    {
-      name: 'الحمى العامة',
-      symptoms: ['ارتفاع درجة الحرارة', 'صداع', 'ألم في الجسم', 'تعب'],
-      homecare: ['شرب السوائل الباردة', 'كمادات باردة', 'راحة', 'ملابس خفيفة'],
-      warning: 'راجع الطبيب إذا استمرت الحمى أكثر من 3 أيام'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-hero py-8">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div className="text-center space-y-6 mb-12 animate-fade-in">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center space-y-6 mb-12"
+        >
           <Badge variant="outline" className="inline-flex items-center gap-2">
             <Pill className="w-4 h-4" />
             دليل الأدوية الشامل
@@ -174,7 +95,7 @@ const Medications = () => {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             معلومات شاملة ومحدثة عن الأدوية المتوفرة في السودان
           </p>
-        </div>
+        </motion.div>
 
         <Tabs defaultValue="medications" className="space-y-8">
           <TabsList className="grid w-full grid-cols-2 bg-card/50 backdrop-blur-sm border border-primary/20">
@@ -190,7 +111,7 @@ const Medications = () => {
 
           <TabsContent value="medications" className="space-y-8">
             {/* Search and Filters */}
-            <Card className="bg-gradient-card border-primary/20 shadow-medical backdrop-blur-sm animate-fade-in-up">
+            <Card className="bg-gradient-card border-primary/20 shadow-medical backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-4">
                   <div className="flex-1 relative">
@@ -227,14 +148,31 @@ const Medications = () => {
 
             {/* Medications Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredMedications.map((medication, index) => (
+              {!medications ? (
+                 // Loading Skeletons
+                 Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="h-[300px]">
+                        <CardHeader><Skeleton className="h-4 w-3/4" /></CardHeader>
+                        <CardContent className="space-y-4">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-10 w-full mt-4" />
+                        </CardContent>
+                    </Card>
+                 ))
+              ) : medications.length > 0 ? (
+                  medications.map((medication: Medication, index: number) => (
+                <motion.div
+                  key={medication._id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
                 <Card 
-                  key={medication.id}
                   tabIndex={0}
                   role="button"
                   aria-label={`عرض تفاصيل ${medication.arabicName}`}
-                  className="group bg-gradient-card border-primary/20 hover:border-primary/40 hover:shadow-medical transition-all duration-500 hover:scale-105 cursor-pointer animate-fade-in-up focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className="group bg-gradient-card border-primary/20 hover:border-primary/40 hover:shadow-medical transition-all duration-500 hover:scale-105 cursor-pointer h-full flex flex-col focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
                   onClick={() => setSelectedMedication(medication)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -268,18 +206,18 @@ const Medications = () => {
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="space-y-3">
-                    <CardDescription className="text-sm leading-relaxed">
+                  <CardContent className="space-y-3 flex-1 flex flex-col">
+                    <CardDescription className="text-sm leading-relaxed line-clamp-2">
                       {medication.description}
                     </CardDescription>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-2 mt-auto">
                       <div className="flex items-center gap-2">
                         <Pill className="w-4 h-4 text-primary" />
                         <span className="text-xs font-medium">الاستخدامات الرئيسية:</span>
                       </div>
                       <ul className="text-xs text-muted-foreground space-y-1 mr-6">
-                        {medication.uses.slice(0, 2).map((use, idx) => (
+                        {medication.uses.slice(0, 2).map((use: string, idx: number) => (
                           <li key={idx}>• {use}</li>
                         ))}
                         {medication.uses.length > 2 && (
@@ -288,32 +226,45 @@ const Medications = () => {
                       </ul>
                     </div>
                     
-                    <Button variant="outline" size="sm" className="w-full group-hover:border-primary/60">
+                    <Button variant="outline" size="sm" className="w-full mt-4 group-hover:border-primary/60">
                       <Info className="w-4 h-4 ml-2" />
                       عرض التفاصيل
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
+                </motion.div>
+              ))) : (
+                <div className="col-span-full">
+                <Card className="bg-gradient-card border-primary/20 text-center py-12">
+                    <CardContent>
+                    <Archive className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-lg text-muted-foreground">لم يتم العثور على أدوية تطابق البحث</p>
+                    </CardContent>
+                </Card>
+                </div>
+              )}
             </div>
-
-            {filteredMedications.length === 0 && (
-              <Card className="bg-gradient-card border-primary/20 text-center py-12">
-                <CardContent>
-                  <Archive className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-lg text-muted-foreground">لم يتم العثور على أدوية تطابق البحث</p>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="acute" className="space-y-8">
             <div className="grid md:grid-cols-2 gap-6">
-              {acuteConditions.map((condition, index) => (
+              {!acuteConditions ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Card key={i} className="h-[200px]">
+                        <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+                        <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+                    </Card>
+                  ))
+              ) : (
+                acuteConditions.map((condition: { name: string; symptoms: string[]; homecare: string[]; warning: string }, index: number) => (
+                <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                >
                 <Card 
-                  key={index}
-                  className="bg-gradient-card border-primary/20 hover:border-primary/40 hover:shadow-medical transition-all duration-500 animate-fade-in-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className="bg-gradient-card border-primary/20 hover:border-primary/40 hover:shadow-medical transition-all duration-500 h-full"
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3">
@@ -329,7 +280,7 @@ const Medications = () => {
                         الأعراض:
                       </h4>
                       <ul className="text-sm text-muted-foreground space-y-1 mr-6">
-                        {condition.symptoms.map((symptom, idx) => (
+                        {condition.symptoms.map((symptom: string, idx: number) => (
                           <li key={idx}>• {symptom}</li>
                         ))}
                       </ul>
@@ -341,7 +292,7 @@ const Medications = () => {
                         الرعاية المنزلية:
                       </h4>
                       <ul className="text-sm text-muted-foreground space-y-1 mr-6">
-                        {condition.homecare.map((care, idx) => (
+                        {condition.homecare.map((care: string, idx: number) => (
                           <li key={idx}>• {care}</li>
                         ))}
                       </ul>
@@ -358,16 +309,24 @@ const Medications = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                </motion.div>
+              )))}
             </div>
           </TabsContent>
         </Tabs>
       </div>
 
       {/* Medication Detail Modal */}
+      <AnimatePresence>
       {selectedMedication && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-fade-in">
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto bg-gradient-card border-primary/20 shadow-medical">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-4xl max-h-[90vh] overflow-auto"
+          >
+          <Card className="w-full bg-gradient-card border-primary/20 shadow-medical">
             <CardHeader className="border-b border-border/50">
               <div className="flex items-start justify-between">
                 <div>
@@ -463,8 +422,10 @@ const Medications = () => {
               </div>
             </CardContent>
           </Card>
+          </motion.div>
         </div>
       )}
+      </AnimatePresence>
     </div>
   );
 };
