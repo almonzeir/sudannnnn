@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +48,7 @@ const Medications = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch data from Convex
   const medications = useQuery(api.medications.list, {
@@ -58,12 +59,23 @@ const Medications = () => {
   const acuteConditions = useQuery(api.acuteConditions.list);
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedMedication(null);
+
+      // Focus search on '/' or Cmd+K
+      if (
+        (e.key === '/' || (e.key === 'k' && (e.metaKey || e.ctrlKey))) &&
+        !selectedMedication &&
+        document.activeElement !== searchInputRef.current &&
+        !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedMedication]);
 
   const categories = [
     { id: 'all', name: 'جميع الفئات', icon: BookOpen },
@@ -115,13 +127,32 @@ const Medications = () => {
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
                     <Input
-                      placeholder="ابحث عن دواء..."
+                      ref={searchInputRef}
+                      placeholder="ابحث عن دواء... (اضغط /)"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pr-10 bg-background/50 border-primary/20"
+                      className="pr-10 pl-10 bg-background/50 border-primary/20 text-right"
+                      aria-label="بحث عن دواء"
                     />
+                    <AnimatePresence>
+                      {searchQuery && (
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          onClick={() => {
+                            setSearchQuery('');
+                            searchInputRef.current?.focus();
+                          }}
+                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full hover:bg-background/80"
+                          aria-label="مسح البحث"
+                        >
+                          <X className="w-4 h-4" />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </div>
                   
                   <div className="flex gap-3">
