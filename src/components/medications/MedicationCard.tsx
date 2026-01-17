@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Pill } from "lucide-react";
 import type { Medication } from "@/types";
+import type { KeyboardEvent } from "react";
 
 interface MedicationCardProps {
   medication: Medication;
@@ -9,11 +10,21 @@ interface MedicationCardProps {
 }
 
 export const MedicationCard = ({ medication, index, onClick }: MedicationCardProps) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (onClick && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
     <Card
       onClick={onClick}
-      className="bg-gradient-card border-primary/20 hover:border-primary/40 transition-all duration-300 animate-fade-in-up cursor-pointer h-full flex flex-col"
+      className="bg-gradient-card border-primary/20 hover:border-primary/40 transition-all duration-300 animate-fade-in-up cursor-pointer h-full flex flex-col focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
       style={{ animationDelay: `${index * 0.1}s` }}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? handleKeyDown : undefined}
     >
       <CardContent className="p-4 flex-grow">
         <div className="flex items-center gap-3 mb-2">
