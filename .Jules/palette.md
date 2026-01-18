@@ -5,3 +5,7 @@
 ## 2024-05-22 - Dual-Language Search Reliability
 **Learning:** Relying solely on database search indexes for dual-language (English/Arabic) content can be flaky during rapid development/testing.
 **Action:** For small-to-medium datasets, implementing robust in-memory filtering (checking both fields with normalization) ensures immediate and reliable search results, improving the "it just works" feeling.
+
+## 2024-05-22 - Icon-Only Button Accessibility
+**Learning:** Many icon-only buttons (using `size="icon"`) in this project lack `aria-label` attributes, making them inaccessible to screen readers.
+**Action:** When using `Button` with `size="icon"` (or similar icon-only interactive elements), always verify and add a descriptive `aria-label`.

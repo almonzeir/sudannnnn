@@ -121,6 +121,7 @@ const Medications = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pr-10 bg-background/50 border-primary/20"
+                      aria-label="بحث عن دواء"
                     />
                   </div>
                   
