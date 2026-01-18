@@ -213,6 +213,7 @@ const Login = () => {
                         size="icon"
                         className="absolute left-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "إخفاء كلمة المرور" : "عرض كلمة المرور"}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
@@ -292,6 +293,7 @@ const Login = () => {
                         size="icon"
                         className="absolute left-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "إخفاء كلمة المرور" : "عرض كلمة المرور"}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
@@ -381,6 +383,7 @@ const Login = () => {
                         size="icon"
                         className="absolute left-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "إخفاء كلمة المرور" : "عرض كلمة المرور"}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
