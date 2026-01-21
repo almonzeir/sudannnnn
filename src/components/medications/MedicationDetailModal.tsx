@@ -41,7 +41,7 @@ export const MedicationDetailModal = ({
                 {medication.name}
               </CardDescription>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose} aria-label="إغلاق">
               <X />
             </Button>
           </div>

@@ -92,14 +92,14 @@ const Navigation = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative hover-lift glass">
+            <Button variant="ghost" size="icon" className="relative hover-lift glass" aria-label="الإشعارات">
               <Bell className="w-5 h-5" />
               <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive animate-pulse-soft">
                 3
               </Badge>
             </Button>
             
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover-lift glass hover:glow-cyan">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover-lift glass hover:glow-cyan" aria-label="تبديل المظهر">
               {theme === "dark" ? (
                 <Sun className="w-5 h-5" />
               ) : (
@@ -129,7 +129,7 @@ const Navigation = () => {
               </>
             )}
 
-            <Button variant="outline" size="icon" className="hover-lift glass hover:glow-purple">
+            <Button variant="outline" size="icon" className="hover-lift glass hover:glow-purple" aria-label="الإعدادات">
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -140,6 +140,7 @@ const Navigation = () => {
             size="icon"
             className="lg:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
           >
             {isMobileMenuOpen ? (
               <X className="w-5 h-5" />
@@ -171,7 +172,7 @@ const Navigation = () => {
               
               <div className="flex items-center justify-between py-2 px-2">
                 <span className="text-sm text-muted-foreground">الوضع المظلم</span>
-                <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="تبديل المظهر">
                   {theme === "dark" ? (
                     <Sun className="w-5 h-5" />
                   ) : (
