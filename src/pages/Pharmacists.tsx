@@ -50,6 +50,7 @@ interface Question {
 
 const Pharmacists = () => {
   const [activeTab, setActiveTab] = useState('ask');
+  const [selectedPharmacist, setSelectedPharmacist] = useState<string | null>(null);
   const { toast } = useToast();
 
   const pharmacists: Pharmacist[] = [
@@ -149,7 +150,11 @@ const Pharmacists = () => {
 
           {/* Ask Pharmacist Tab */}
           <TabsContent value="ask" className="space-y-8">
-            <AskPharmacistForm pharmacists={pharmacists} />
+            <AskPharmacistForm
+              pharmacists={pharmacists}
+              selectedPharmacist={selectedPharmacist}
+              onSelectPharmacist={setSelectedPharmacist}
+            />
           </TabsContent>
 
           {/* Pharmacists List Tab */}

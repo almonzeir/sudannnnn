@@ -90,7 +90,21 @@ export const AskPharmacistForm = forwardRef<HTMLDivElement, AskPharmacistFormPro
           <label className="text-sm font-medium mb-3 block">اختر الصيدلي:</label>
           <div className="grid gap-4">
             {pharmacists.filter(p => p.available).map((pharmacist) => (
-              <Card key={pharmacist.id} className={`cursor-pointer transition-all duration-300 border-2 ${selectedPharmacist === pharmacist.id ? 'border-primary shadow-medical' : 'border-primary/20 hover:border-primary/40'}`} onClick={() => onSelectPharmacist(pharmacist.id)}>
+              <Card
+                key={pharmacist.id}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selectedPharmacist === pharmacist.id}
+                aria-label={`اختر الصيدلي ${pharmacist.name}`}
+                className={`cursor-pointer transition-all duration-300 border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${selectedPharmacist === pharmacist.id ? 'border-primary shadow-medical' : 'border-primary/20 hover:border-primary/40'}`}
+                onClick={() => onSelectPharmacist(pharmacist.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectPharmacist(pharmacist.id);
+                  }
+                }}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -115,7 +129,7 @@ export const AskPharmacistForm = forwardRef<HTMLDivElement, AskPharmacistFormPro
             <label htmlFor="category-select" className="text-sm font-medium mb-2 block">فئة السؤال:</label>
             <Select value={category} onValueChange={setCategory}><SelectTrigger id="category-select" className="w-full bg-background/50 border-primary/20"><SelectValue placeholder="اختر الفئة" /></SelectTrigger><SelectContent>{questionCategories.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent></Select>
           </div>
-          <div><label className="text-sm font-medium mb-2 block">سؤالك:</label><Textarea placeholder="اكتب سؤالك بالتفصيل..." value={question} onChange={(e) => setQuestion(e.target.value)} className="min-h-32 bg-background/50 border-primary/20 focus:border-primary/60" /></div>
+          <div><label htmlFor="question-text" className="text-sm font-medium mb-2 block">سؤالك:</label><Textarea id="question-text" placeholder="اكتب سؤالك بالتفصيل..." value={question} onChange={(e) => setQuestion(e.target.value)} className="min-h-32 bg-background/50 border-primary/20 focus:border-primary/60" /></div>
           <div className="flex items-center gap-2"><Checkbox id="urgent" checked={isUrgent} onCheckedChange={(checked) => setIsUrgent(Boolean(checked))} /><label htmlFor="urgent" className="text-sm font-medium leading-none cursor-pointer">هل السؤال عاجل؟</label></div>
           <Button onClick={handleSubmitQuestion} className="w-full" variant="glow" size="lg" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="w-5 h-5 ml-2 animate-spin" /> : <Send className="w-5 h-5 ml-2" />}{isSubmitting ? "جاري الإرسال..." : "إرسال السؤال"}</Button>
         </div>
