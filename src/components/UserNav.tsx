@@ -30,7 +30,7 @@ export const UserNav = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="قائمة المستخدم">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user.user_metadata.avatar_url} alt={user.email} />
               <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
