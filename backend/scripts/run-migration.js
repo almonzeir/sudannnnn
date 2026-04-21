@@ -31,44 +31,60 @@ async function runMigration() {
       .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
     
     console.log(`📝 Found ${statements.length} SQL statements to execute`);
+    console.log('⏳ Executing migration in batch...');
     
-    // Execute each statement
-    for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i] + ';';
-      console.log(`⏳ Executing statement ${i + 1}/${statements.length}...`);
+    try {
+      // Attempt to execute the entire migration in a single RPC call
+      const { error: batchError } = await supabase.rpc('exec_sql', { sql: migrationSQL });
       
-      try {
-        const { error } = await supabase.rpc('exec_sql', { sql: statement });
-        
-        if (error) {
-          // If exec_sql doesn't exist, try direct execution
-          if (error.message.includes('function exec_sql')) {
-            console.log('📝 Using direct SQL execution...');
-            const { error: directError } = await supabase
-              .from('_migrations')
-              .select('*')
-              .limit(1);
-            
-            if (directError) {
-              console.log('⚠️  Direct execution not available. Please run migration manually.');
-              console.log('\n📋 SQL to execute:');
-              console.log('=' .repeat(50));
-              console.log(migrationSQL);
-              console.log('=' .repeat(50));
-              return;
-            }
-          } else {
-            throw error;
+      if (batchError) {
+        // If exec_sql doesn't exist, try direct execution or fall back to individual statements
+        if (batchError.message.includes('function exec_sql')) {
+          console.log('📝 exec_sql function not found, checking direct execution...');
+          const { error: directError } = await supabase
+            .from('_migrations')
+            .select('*')
+            .limit(1);
+
+          if (directError) {
+            console.log('⚠️  Direct execution not available. Please run migration manually.');
+            console.log('\n📋 SQL to execute:');
+            console.log('=' .repeat(50));
+            console.log(migrationSQL);
+            console.log('=' .repeat(50));
+            return;
+          }
+
+          // If we can do direct execution (theoretically), but supabase-js doesn't support raw SQL,
+          // we might still need to loop if we had a way to execute raw SQL directly.
+          // But since we are using RPC 'exec_sql', if that's missing, we are stuck.
+        } else {
+          console.warn('⚠️ Batch execution failed, falling back to individual statements for detailed error reporting...');
+          throw batchError; // Fall back to catch block which will handle the loop
+        }
+      } else {
+        console.log('✅ Migration executed successfully in batch');
+      }
+    } catch (batchError) {
+      if (!batchError.message.includes('function exec_sql')) {
+        console.log('🔄 Executing statements individually...');
+        for (let i = 0; i < statements.length; i++) {
+          const statement = statements[i] + ';';
+          console.log(`⏳ Executing statement ${i + 1}/${statements.length}...`);
+
+          try {
+            const { error } = await supabase.rpc('exec_sql', { sql: statement });
+            if (error) throw error;
+            console.log(`✅ Statement ${i + 1} executed successfully`);
+          } catch (statementError) {
+            console.error(`❌ Error executing statement ${i + 1}:`, statementError.message);
+            console.log('Statement:', statement);
+            // Continue with other statements
+            continue;
           }
         }
-        
-        console.log(`✅ Statement ${i + 1} executed successfully`);
-      } catch (statementError) {
-        console.error(`❌ Error executing statement ${i + 1}:`, statementError.message);
-        console.log('Statement:', statement);
-        
-        // Continue with other statements
-        continue;
+      } else {
+        throw batchError;
       }
     }
     
